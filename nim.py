@@ -131,8 +131,22 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
-
+        # Takes de Q-learning dictionary filtered by the given state
+        filtered_dict = { (s, a): v
+                  for (s, a), v in self.q.items()
+                  if s == state}
+        
+        # If filtered_dict i
+        if not filtered_dict:
+            return 0
+        # If there are no available actions in 'state' return 0
+        all_none_actions = all(action is None for (_, action), _ in filtered_dict)
+        if all_none_actions:
+            return 0
+        # Else, return the maximum of value from among all Q-values
+        return max(filtered_dict.values())
+    
+        
     def choose_action(self, state, epsilon=True):
         """
         Given a state `state`, return an action `(i, j)` to take.
