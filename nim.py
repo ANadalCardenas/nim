@@ -131,14 +131,13 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        # Takes de Q-learning dictionary filtered by the given state
-        filtered_dict = { (s, a): v
-                  for (s, a), v in self.q.items()
-                  if s == state}
-        
-        # If filtered_dict i
-        if not filtered_dict:
-            return 0
+        # Takes de Q-learning dictionary filtered by the given state. Replaces with 0
+        # the pairs that have no value
+        filtered_dict = {
+            (s, a): (v if v else 0)
+            for (s, a), v in self.q.items()
+            if s == state
+        }
         # If there are no available actions in 'state' return 0
         all_none_actions = all(action is None for (_, action), _ in filtered_dict)
         if all_none_actions:
@@ -165,17 +164,13 @@ class NimAI():
         # Selects a randomly action with a probability lower than self.epsilon
         if epsilon and random.random() < self.epsilon:
             available_actions = [a for (s, a), v in self.q.items() if s == state]
-            print(available_actions)
-            return random.choice(available_actions)
-        else:
-            # Selects a randomly action between all available actions.
-            best_value = self.best_future_reward(state)
-            if best_value:
-                matches = [a for (s, a), value in self.q.items() if value == best_value]
-                return random.choice(matches)
-            else: 
-                # If not available actions, returns 0
-                return 0
+            if available_actions:
+                return random.choice(available_actions)
+        # Selects a randomly action between all available actions.
+        best_value = self.best_future_reward(state)
+        matches = [a for (s, a), value in self.q.items() if value == best_value]
+        return random.choice(matches)
+        
 
 def train(n):
     """
@@ -201,7 +196,7 @@ def train(n):
             # Keep track of current state and action
             state = game.piles.copy()
             action = player.choose_action(game.piles)
-
+            print("Action: ", action)
             # Keep track of last state and action
             last[game.player]["state"] = state
             last[game.player]["action"] = action
