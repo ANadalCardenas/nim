@@ -161,11 +161,12 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        # Selects a randomly action with a probability lower than self.epsilon
-        if epsilon and random.random() < self.epsilon:
-            available_actions = [a for (s, a), v in self.q.items() if s == state]
-            if available_actions:
-                return random.choice(available_actions)
+        
+        # Selects a randomly action with a probability self.epsilon
+        if epsilon:
+                available_actions = [a for (s, a), v in self.q.items() if s == state]
+                weights = [self.epsilon for i in range (1, len(available_actions))]
+                return random.choices(available_actions, weights = weights, k=1)[0]
         # Selects a randomly action between all available actions.
         best_value = self.best_future_reward(state)
         matches = [a for (s, a), value in self.q.items() if value == best_value]
