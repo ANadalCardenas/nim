@@ -131,6 +131,7 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
+
         # Takes de Q-learning dictionary filtered by the given state. Replaces with 0
         # the pairs that have no value
         filtered_dict = {
@@ -161,16 +162,20 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        
         # Selects a randomly action with a probability self.epsilon
+        print("State: ", state)
+        print("Epsilon: ", epsilon)
         if epsilon:
-                available_actions = [a for (s, a), v in self.q.items() if s == state]
+            available_actions = [a for (s, a), v in self.q.items() if s == state]
+            if available_actions:
                 weights = [self.epsilon for i in range (1, len(available_actions))]
                 return random.choices(available_actions, weights = weights, k=1)[0]
         # Selects a randomly action between all available actions.
         best_value = self.best_future_reward(state)
         matches = [a for (s, a), value in self.q.items() if value == best_value]
-        return random.choice(matches)
+        if matches:
+            return random.choice(matches)
+        return None
         
 
 def train(n):
