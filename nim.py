@@ -121,6 +121,17 @@ class NimAI():
         new_value = old_q + self.alpha * (reward + future_rewards)
         self.q[(state, action)] = new_value
 
+    
+    def available_actions(self, piles):
+        """
+        List availables actions for current states list (piles)
+        """
+        actions = set()
+        for i, pile in enumerate(piles):
+            for j in range(1, pile + 1):
+                actions.add((i, j))
+        return actions
+    
     def best_future_reward(self, state):
         """
         Given a state `state`, consider all possible `(state, action)`
