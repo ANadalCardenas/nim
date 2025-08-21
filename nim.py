@@ -52,13 +52,15 @@ class Nim():
         `action` must be a tuple `(i, j)`.
         """
         pile, count = action
-
         # Check for errors
         if self.winner is not None:
             raise Exception("Game already won")
         elif pile < 0 or pile >= len(self.piles):
             raise Exception("Invalid pile")
         elif count < 1 or count > self.piles[pile]:
+            print("Count ", count)
+            print("Piles ", self.piles[pile])
+            print(self.piles)
             raise Exception("Invalid number of objects")
 
         # Update pile
@@ -101,7 +103,7 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        return self.q.values.get((state, action), 0)
+        return self.q.get((tuple(state), tuple(action)), 0)
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -119,7 +121,7 @@ class NimAI():
         is the sum of the current reward and estimated future rewards.
         """
         new_value = old_q + self.alpha * (reward + future_rewards)
-        self.q[(state, action)] = new_value
+        self.q[(tuple(state), tuple(action))] = new_value
 
     
     def available_actions(self, piles):
@@ -142,21 +144,13 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-
-        # Takes de Q-learning dictionary filtered by the given state. Replaces with 0
-        # the pairs that have no value
-        filtered_dict = {
-            (s, a): (v if v else 0)
-            for (s, a), v in self.q.items()
-            if s == state
-        }
-        # If there are no available actions in 'state' return 0
-        all_none_actions = all(action is None for (_, action), _ in filtered_dict)
-        if all_none_actions:
+        # Gets a list of all available action for current state:
+        available_actions_set = self.available_actions(state)
+        # Return 0 if the are not available actions
+        if not available_actions_set:
             return 0
-        # Else, return the maximum of value from among all Q-values
-        return max(filtered_dict.values())
-    
+        return max([self.get_q_value(state, action) for action in available_actions_set])
+        
         
     def choose_action(self, state, epsilon=True):
         """
@@ -174,19 +168,11 @@ class NimAI():
         options is an acceptable return value.
         """
         # Selects a randomly action with a probability self.epsilon
-        print("State: ", state)
-        print("Epsilon: ", epsilon)
-        if epsilon:
-            available_actions = [a for (s, a), v in self.q.items() if s == state]
-            if available_actions:
-                weights = [self.epsilon for i in range (1, len(available_actions))]
-                return random.choices(available_actions, weights = weights, k=1)[0]
-        # Selects a randomly action between all available actions.
-        best_value = self.best_future_reward(state)
-        matches = [a for (s, a), value in self.q.items() if value == best_value]
-        if matches:
-            return random.choice(matches)
-        return None
+        # Takes all possible actions for the current state
+        best_review = self.best_future_reward(state)
+        if best_review == 0:
+            return random.choice(tuple(self.available_actions(state)))
+        return random.choice([a for (s, a), v in self.q.items() if v == best_review])
         
 
 def train(n):
@@ -213,7 +199,6 @@ def train(n):
             # Keep track of current state and action
             state = game.piles.copy()
             action = player.choose_action(game.piles)
-            print("Action: ", action)
             # Keep track of last state and action
             last[game.player]["state"] = state
             last[game.player]["action"] = action
