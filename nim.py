@@ -58,9 +58,6 @@ class Nim():
         elif pile < 0 or pile >= len(self.piles):
             raise Exception("Invalid pile")
         elif count < 1 or count > self.piles[pile]:
-            print("Count ", count)
-            print("Piles ", self.piles[pile])
-            print(self.piles)
             raise Exception("Invalid number of objects")
 
         # Update pile
@@ -169,13 +166,14 @@ class NimAI():
         """
         # Selects a randomly action with a probability self.epsilon
         # Takes all possible actions for the current state
+        
         best_review = self.best_future_reward(state)
         if best_review == 0:
-            return random.choice(tuple(self.available_actions(state)))
-        return random.choice([a for (s, a), v in self.q.items() if v == best_review])
+            return random.choice(tuple(self.available_actions(state))) 
+        return random.choice([a for (s, a), v in self.q.items() if v == best_review and s == tuple(state)])
         
 
-def train(n):
+def train(n): 
     """
     Train an AI by playing `n` games against itself.
     """
