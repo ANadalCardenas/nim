@@ -163,13 +163,17 @@ class NimAI():
 
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
-        """
-        # Selects a randomly action with a probability self.epsilon
-        # Takes all possible actions for the current state
-        
+        """ 
+        # If `epsilon` is `True`, then with probability `self.epsilon` choose a random available action, otherwise choose the best action available
+        if epsilon and random.random() < 0.1:
+             return random.choice(tuple(self.available_actions(state))) 
+        # If `epsilon` is `False`, then return the best action available in the state
         best_review = self.best_future_reward(state)
-        if best_review == 0:
-            return random.choice(tuple(self.available_actions(state))) 
+        if best_review == 0:            
+            # If it can't still calculate 'best_review', choses a random available action
+           return random.choice(tuple(self.available_actions(state)))
+        # If it finds the best review, choses a random action beetwen actions with highest review.
+        # If epsilon is True and radom.random() >= 0.1, also choses the best action
         return random.choice([a for (s, a), v in self.q.items() if v == best_review and s == tuple(state)])
         
 
